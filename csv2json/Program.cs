@@ -14,8 +14,8 @@ namespace csv2json
             //подключаем украинский язык в консоли
             //Console.OutputEncoding = System.Text.Encoding.Unicode;
             //Console.InputEncoding = System.Text.Encoding.Unicode;
-           
 
+            /*
 
             string path = "products.csv";
             List<string> fileLine = new List<string>();
@@ -36,9 +36,73 @@ namespace csv2json
                 foreach (string s in str) Console.WriteLine(s);
 
             }
-            
+          */
 
 
+            string text = "111;\"113\"\"\"\";23123\"\"\";23end\";\"123\";123";
+
+            List<string> str = new List<string>();
+
+            string[] s = new string[2];
+            s[1] = text;
+            while (s[1]!= "")
+            {
+               s = fieldParse(text);
+               str.Add(s[0]);
+                text = s[1];
+                Console.WriteLine(s[0]);
+            }
+
+         
+
+            foreach (string st in str) Console.WriteLine(st);
+        }
+
+        static string[] fieldParse(string text)
+        {
+            string[] outString = new string[2];
+
+            int i = 0;
+            if (text.IndexOf(";")==-1)
+            {
+                outString[0] = text;
+                outString[1] = "";
+                return outString;
+            }
+
+            if (text[i] != ';' && text[i] != '"' && i == 0)
+            {
+            //    Console.WriteLine(text.Substring(0, text.IndexOf(";", i)));
+                outString[0]=text.Substring(0, text.IndexOf(";", i));
+                outString[1] = text.Substring(text.IndexOf(";", i) + 1);
+                return outString;
+            }
+
+            if (text[i] == ';' && i == 0)
+            {
+            //    Console.WriteLine("empty field");
+                outString[0]=" ";
+                outString[1] = text.Substring(1);
+                return outString;
+            }
+
+            if (text[i] == '"' && i == 0)
+            {
+                while (i < text.Length)
+                {
+                    if (text.IndexOf("\";", i) != -1 && text[(text.IndexOf("\";", i) - 1)] != '"')
+                    {
+              //          Console.WriteLine(text.Substring(1, text.IndexOf("\";", i) - 1));
+                        outString[0]=text.Substring(1, text.IndexOf("\";", i) - 1);
+                        outString[1] = text.Substring(text.IndexOf("\";", i) + 2);
+                        return outString;
+                        
+                    }
+                    i++;
+                }
+            }
+
+            return outString;
         }
 
 
