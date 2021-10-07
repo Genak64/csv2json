@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "csv2json": {
+      "commandName": "Project",
+      "commandLineArgs": "products.csv"
+    }
+  }
+}
