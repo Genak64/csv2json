@@ -34,7 +34,7 @@ namespace csv2json
         }
 
 
-        static List<string> readCsvFile(string pathFile, string encodingFile)
+       public static List<string> readCsvFile(string pathFile, string encodingFile)
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
