@@ -2,7 +2,8 @@
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
-
+using Newtonsoft.Json;
+using Microsoft.VisualBasic.FileIO;
 
 namespace csv2json
 {
@@ -14,186 +15,136 @@ namespace csv2json
             //подключаем украинский язык в консоли
             //Console.OutputEncoding = System.Text.Encoding.Unicode;
             //Console.InputEncoding = System.Text.Encoding.Unicode;
+            settings setPr = new settings();
+            string path = "Settings.json";
+            FileInfo fSettings = new FileInfo(path);
+            if (fSettings.Exists)
+            {
+                using (StreamReader sr = new StreamReader(path))
+                {
+                    string tmp = sr.ReadToEnd();
+                    setPr = JsonConvert.DeserializeObject<settings>(tmp);
+                }
+
+            } else
+            {
+                switch (args.Length)
+                {
+                    case 0:
+                        Console.WriteLine(" отсутствуют аргументы, варианты:");
+                        Console.WriteLine(" /имя входного файла csv/");
+                        Console.WriteLine(" /имя входного файла csv/ /имя выходного файла json/");
+                        Console.WriteLine(" /имя входного файла csv/ /имя выходного файла json/ /кодировка/");
+                        Console.WriteLine(" /имя входного файла csv/ /имя выходного файла json/ /кодировка/ /разделитель/");
+                        Console.WriteLine(" пример: csv2json file.csv file.json Windows-1251 ;");
+                        Console.WriteLine(" имя выходного файла по умолчанию: output.json");
+                        Console.WriteLine(" кодировка по умолчанию: Windows-1251");
+                        Console.WriteLine(" разделитель по умолчанию: ;");
+                        return;
+                    case 1:
+                        setPr.inputFileName = args[0];
+                        setPr.outputFileName = "output.json";
+                        setPr.inputFileEncoding = "Windows-1251";
+                        setPr.separator = ";";
+                        break;
+                    case 2:
+                        setPr.inputFileName = args[0];
+                        setPr.outputFileName = args[1];
+                        setPr.inputFileEncoding = "Windows-1251";
+                        setPr.separator = ";";
+                        break;
+                    case 3:
+                        setPr.inputFileName = args[0];
+                        setPr.outputFileName = args[1];
+                        setPr.inputFileEncoding = args[2];
+                        setPr.separator = ";";
+                        break;
+                    case 4:
+                        setPr.inputFileName = args[0];
+                        setPr.outputFileName = args[1];
+                        setPr.inputFileEncoding = args[2];
+                        setPr.separator = args[3];
+                        break;
+                    default:
+                        return;
+                }
+
+            }
+
+            table tableItems = new table();
+
+            tableItems = ParseCSV.loadCsvFile(setPr.inputFileName, setPr.inputFileEncoding, setPr.separator[0]);
+
+            string tableJson = JsonConvert.SerializeObject(tableItems);
+
+            using (StreamWriter sw = new StreamWriter(setPr.outputFileName, false, Encoding.Default))
+            {
+                sw.Write(tableJson);
+            }
+
+
+            string filename = "products.csv";
+
+            //    using (StreamReader sr2 = new StreamReader(path))
 
             /*
-
-            string path = "products.csv";
+            using (TextFieldParser r = new TextFieldParser(filename))
+            {
+               r.TextFieldType =FieldType.Delimited;
+                
+               r.SetDelimiters(",");
+                foreach (string s in r.ReadFields()) Console.WriteLine(s);
+            }
+            */
             List<string> fileLine = new List<string>();
 
-            fileLine = readCsvFile(path, "Windows-1251");
-
-
-
-
-            
-
-            List<string> str = new List<string>();
-
-            foreach (string line in fileLine)
-            {
-                str = parseCsvString(line, ';');
-
-                foreach (string s in str) Console.WriteLine(s);
-
-            }
-          */
-
-
-            string text = "111;\"113\"\"\"\";23123\"\"\";23end\";\"123\";123";
-
-            List<string> str = new List<string>();
-
-            string[] s = new string[2];
-            s[1] = text;
-            while (s[1]!= "")
-            {
-               s = fieldParse(text);
-               str.Add(s[0]);
-                text = s[1];
-                Console.WriteLine(s[0]);
-            }
-
-         
-
-            foreach (string st in str) Console.WriteLine(st);
-        }
-
-        static string[] fieldParse(string text)
-        {
-            string[] outString = new string[2];
-
-            int i = 0;
-            if (text.IndexOf(";")==-1)
-            {
-                outString[0] = text;
-                outString[1] = "";
-                return outString;
-            }
-
-            if (text[i] != ';' && text[i] != '"' && i == 0)
-            {
-            //    Console.WriteLine(text.Substring(0, text.IndexOf(";", i)));
-                outString[0]=text.Substring(0, text.IndexOf(";", i));
-                outString[1] = text.Substring(text.IndexOf(";", i) + 1);
-                return outString;
-            }
-
-            if (text[i] == ';' && i == 0)
-            {
-            //    Console.WriteLine("empty field");
-                outString[0]=" ";
-                outString[1] = text.Substring(1);
-                return outString;
-            }
-
-            if (text[i] == '"' && i == 0)
-            {
-                while (i < text.Length)
-                {
-                    if (text.IndexOf("\";", i) != -1 && text[(text.IndexOf("\";", i) - 1)] != '"')
-                    {
-              //          Console.WriteLine(text.Substring(1, text.IndexOf("\";", i) - 1));
-                        outString[0]=text.Substring(1, text.IndexOf("\";", i) - 1);
-                        outString[1] = text.Substring(text.IndexOf("\";", i) + 2);
-                        return outString;
-                        
-                    }
-                    i++;
-                }
-            }
-
-            return outString;
-        }
-
-
-        static List<string> parseCsvString(string csvString, char separator)
-        {
-            List<string> str = new List<string>();
-
-            bool itemOpen = false;
-            int indexOpen = 0;
-            int indexClosed = 0;
-            int openQuotes = 0;
-            int indexQuotes = 0;
-            string quotes = "\"";
-
-            csvString = csvString.Insert(csvString.Length, separator.ToString());
-
-            for (int i = 0; i < csvString.Length; i++)
-            {
-
-                if (csvString[i] == '"' && itemOpen == false)
-                {
-                     openQuotes = i;
-                    if (csvString.IndexOf((quotes + quotes + separator), i) == -1)
-                    {
-                        
-                        indexQuotes = csvString.IndexOf((quotes + separator), i);
-                        str.Add(csvString.Substring(i + 1, indexQuotes - i - 1));
-                        i = indexQuotes;
-                    } else
-                    {
-                        Console.WriteLine((quotes + quotes + separator));
-
-                        i = csvString.IndexOf((quotes + quotes + separator), i)+3;
-                        indexQuotes = csvString.IndexOf((quotes + separator), i);
-                        str.Add(csvString.Substring(openQuotes + 1, indexQuotes - i - 1));
-                        i = indexQuotes;
-                    }
-
-                }
-
-                if (csvString[i] != '"' && itemOpen == false)
-                {
-                    itemOpen = true;
-                    indexOpen = i;
-                }
-                
-                if (csvString[i] == separator && itemOpen == true)
-                {
-                    indexClosed = i;
-                    str.Add(csvString.Substring(indexOpen, indexClosed - indexOpen));
-                    itemOpen = false;
-                    indexOpen = i;
-                }
-/*
-                if (csvString.Length - 1 == i && itemOpen == true)
-                {
-                    indexClosed = csvString.Length;
-                    str.Add(csvString.Substring(indexOpen, indexClosed - indexOpen));
-                }
-*/
-            }
-
-            return str;
-
-        }
-
-        static List<string> readCsvFile(string pathFile, string encodingFile)
-        {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-            Encoding enc = Encoding.GetEncoding(encodingFile);
+            Encoding enc = Encoding.GetEncoding("Windows-1251");
 
-           // Encoding utf8 = Encoding.GetEncoding("UTF-8");
-           // Encoding win1251 = Encoding.GetEncoding("Windows-1251");
+            //fileLine = ParseCSV.readCsvFile("products.csv", "Windows-1251");
 
-            List<string> fileLine = new List<string>();
-
-            using (StreamReader reader = new StreamReader(pathFile, enc))
+            using (TextFieldParser r = new TextFieldParser(filename, enc))
             {
-                string line;
-                while ((line = reader.ReadLine()) != null)
+                r.TextFieldType = FieldType.Delimited;
+
+                r.SetDelimiters(";");
+                //   foreach (string s in r.ReadFields()) Console.WriteLine(s);
+
+                while (!r.EndOfData)
                 {
-                    fileLine.Add(line);
-                    Console.WriteLine(line);
+                    foreach (string s in r.ReadFields()) Console.WriteLine(s);
                 }
             }
-            return fileLine;
+            
+
+
+
         }
+
+
 
 
 
 
     }
+
+    [Serializable]
+    class table
+    {
+       public  List<List<string>> item = new List<List<string>>();
+    }
+    [Serializable]
+    class settings
+    {
+       public string inputFileName { get; set; }
+       public string outputFileName { get; set; }
+       public string inputFileEncoding { get; set; }
+       public string separator { get; set; }
+
+    }
+
+
+
+   
 }
