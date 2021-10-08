@@ -2,7 +2,7 @@
   "profiles": {
     "csv2json": {
       "commandName": "Project",
-      "commandLineArgs": "products.csv"
+      "commandLineArgs": "products.csv output.json Windows-1251 ; "
     }
   }
 }
