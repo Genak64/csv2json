@@ -73,7 +73,9 @@ namespace csv2json
 
             table tableItems = new table();
 
-            tableItems = ParseCSV.loadCsvFile(setPr.inputFileName, setPr.inputFileEncoding, setPr.separator[0]);
+            tableItems = LoadCSV(setPr.inputFileName, setPr.inputFileEncoding, setPr.separator);
+
+      //      tableItems = ParseCSV.loadCsvFile(setPr.inputFileName, setPr.inputFileEncoding, setPr.separator[0]);
 
             string tableJson = JsonConvert.SerializeObject(tableItems);
 
@@ -83,44 +85,48 @@ namespace csv2json
             }
 
 
-            string filename = "products.csv";
+        }
 
-            //    using (StreamReader sr2 = new StreamReader(path))
-
-            /*
-            using (TextFieldParser r = new TextFieldParser(filename))
-            {
-               r.TextFieldType =FieldType.Delimited;
-                
-               r.SetDelimiters(",");
-                foreach (string s in r.ReadFields()) Console.WriteLine(s);
-            }
-            */
-            List<string> fileLine = new List<string>();
+        static table LoadCSV(string filename, string encodingFile, string separator)
+        {
+            table tableItems = new table();
+            List<string> line = new List<string>();
 
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            Encoding enc = Encoding.GetEncoding(encodingFile);
 
-            Encoding enc = Encoding.GetEncoding("Windows-1251");
-
-            //fileLine = ParseCSV.readCsvFile("products.csv", "Windows-1251");
-
+            int i = 0;
             using (TextFieldParser r = new TextFieldParser(filename, enc))
             {
                 r.TextFieldType = FieldType.Delimited;
 
-                r.SetDelimiters(";");
-                //   foreach (string s in r.ReadFields()) Console.WriteLine(s);
+                r.SetDelimiters(separator);
+                
+                if (!r.EndOfData)
+                {
+                    foreach (string s in r.ReadFields())
+                    {
+                        line.Add(s);
+                    }
+                    tableItems.item.Add(new List<string>(line));
+                }
 
                 while (!r.EndOfData)
                 {
-                    foreach (string s in r.ReadFields()) Console.WriteLine(s);
+                    i = 0;
+                     foreach (string s in r.ReadFields())
+                    {
+                        line[i]=s;
+                        i++;
+                    }
+                                       
+                    tableItems.item.Add(new List<string>(line));
                 }
             }
-            
-
-
-
+            return tableItems;
         }
+
+
 
 
 
