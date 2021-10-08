@@ -72,6 +72,12 @@ namespace csv2json
             }
 
             table tableItems = new table();
+            FileInfo enableFile = new FileInfo(setPr.inputFileName);
+            if (enableFile.Exists==false)
+            {
+                Console.WriteLine("Файла с таким именем не существует в текущем каталоге.");
+                return;
+            }
 
             tableItems = LoadCSV(setPr.inputFileName, setPr.inputFileEncoding, setPr.separator);
 
@@ -83,7 +89,7 @@ namespace csv2json
             {
                 sw.Write(tableJson);
             }
-
+            Console.WriteLine($" Входной csv файл:{setPr.inputFileName} выходной json файл:{setPr.outputFileName} ");
 
         }
 
