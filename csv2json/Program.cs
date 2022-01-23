@@ -81,8 +81,6 @@ namespace csv2json
 
             tableItems = LoadCSV(setPr.inputFileName, setPr.inputFileEncoding, setPr.separator);
 
-      //      tableItems = ParseCSV.loadCsvFile(setPr.inputFileName, setPr.inputFileEncoding, setPr.separator[0]);
-
             string tableJson = JsonConvert.SerializeObject(tableItems);
 
             using (StreamWriter sw = new StreamWriter(setPr.outputFileName, false, Encoding.Default))
@@ -90,7 +88,6 @@ namespace csv2json
                 sw.Write(tableJson);
             }
             Console.WriteLine($" Входной csv файл:{setPr.inputFileName} выходной json файл:{setPr.outputFileName} ");
-
         }
 
         static table LoadCSV(string filename, string encodingFile, string separator)
@@ -125,36 +122,16 @@ namespace csv2json
                         line[i]=s;
                         i++;
                     }
-                                       
                     tableItems.item.Add(new List<string>(line));
                 }
             }
             return tableItems;
         }
 
-
-
-
-
-
-
-
     }
 
-    [Serializable]
-    class table
-    {
-       public  List<List<string>> item = new List<List<string>>();
-    }
-    [Serializable]
-    class settings
-    {
-       public string inputFileName { get; set; }
-       public string outputFileName { get; set; }
-       public string inputFileEncoding { get; set; }
-       public string separator { get; set; }
-
-    }
+    
+    
 
 
 
